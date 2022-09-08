@@ -2,6 +2,8 @@
 
 
 #include "Avatar.h"
+#include "MyHUD.h"
+#include "PickupItem.h"
 
 // Sets default values
 AAvatar::AAvatar()
@@ -35,6 +37,8 @@ void AAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("Yaw", this, &AAvatar::Yaw);
 	PlayerInputComponent->BindAxis("Pitch", this, &AAvatar::Pitch);
+
+	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AAvatar::ToggleInventory);
 }
 
 void AAvatar::MoveForward(float amount) {
@@ -54,9 +58,56 @@ void AAvatar::MoveRight(float amount) {
 }
 
 void AAvatar::Yaw(float amount) {
+	
+	if (inventoryShowing) {
+		return;
+	}
+
 	AddControllerYawInput(RotationSpeed * amount * GetWorld()->GetDeltaSeconds());
 }
 
 void AAvatar::Pitch(float amount) {
+	
+	if (inventoryShowing) {
+		return;
+	}
+	
 	AddControllerPitchInput(RotationSpeed * amount * GetWorld()->GetDeltaSeconds());
+}
+
+void AAvatar::ToggleInventory()
+{
+	APlayerController* PController = GetWorld()->GetFirstPlayerController();
+	AMyHUD* hud = Cast<AMyHUD>(PController->GetHUD());
+
+	if (inventoryShowing) {
+		hud->clearWidgets();
+		
+		inventoryShowing = false;
+		PController->bShowMouseCursor = false;
+		
+		return;
+	}
+
+	inventoryShowing = true;
+	PController->bShowMouseCursor = true;
+
+	for (TMap<FString, int>::TIterator it = Backpack.CreateIterator(); it; ++it) {
+		FString fs = it->Key + FString::Printf(TEXT("x %d"), it->Value);
+		UTexture2D* tex = Icons.Find(it->Key) ? Icons[it->Key] : nullptr;
+
+		hud->addWidget(FMyWidget(FIcon(fs, tex)));
+	}
+}
+
+void AAvatar::Pickup(APickupItem* item)
+{
+	if (Backpack.Find(item->Name)) {
+		Backpack[item->Name] += item->Quantity;
+		
+		return;
+	}
+
+	Backpack.Add(item->Name, item->Quantity);
+	Icons.Add(item->Name, item->Icon);
 }

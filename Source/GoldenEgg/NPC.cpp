@@ -18,6 +18,7 @@ ANPC::ANPC(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitialize
 
 	ProxSphere->OnComponentBeginOverlap.AddDynamic(this, &ANPC::Prox);
 	NpcMessage = "Hi, I'm Owen";
+	Name = "Owen";
 }
 
 // Called when the game starts or when spawned
@@ -37,7 +38,7 @@ void ANPC::Prox_Implementation(class UPrimitiveComponent* OverlappedComp, class 
 
 	if (PControler) {
 		AMyHUD* hud = Cast<AMyHUD>(PControler->GetHUD());
-		hud->addMessage(FMessage(NpcMessage));
+		hud->addMessage(FMessage(Name + FString(": ") + NpcMessage, Face));
 	}
 }
 

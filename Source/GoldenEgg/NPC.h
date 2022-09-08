@@ -26,6 +26,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = NPCMessage)
 	FString NpcMessage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = NPCMessage)
+	FString Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = NPCMessage)
+	UTexture2D* Face;
+
 	UFUNCTION(BlueprintNativeEvent, Category = Collision)
 	void Prox(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	// Called every frame

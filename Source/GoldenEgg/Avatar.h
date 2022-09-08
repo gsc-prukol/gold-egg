@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Avatar.generated.h"
 
+class APickupItem;
+
 UCLASS()
 class GOLDENEGG_API AAvatar : public ACharacter
 {
@@ -25,6 +27,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RotationSpeed = 200;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
+	float MaxHp = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HP)
+	float Hp = 30;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
+	TMap<FString, int> Backpack;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
+	TMap<FString, UTexture2D*> Icons;
+
+	bool inventoryShowing;
+
+	void Pickup(APickupItem* item);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -36,4 +53,6 @@ public:
 
 	void Yaw(float amount);
 	void Pitch(float amount);
+
+	void ToggleInventory();
 };
