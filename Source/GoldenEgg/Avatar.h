@@ -7,6 +7,7 @@
 #include "Avatar.generated.h"
 
 class APickupItem;
+class AMyHUD;
 
 UCLASS()
 class GOLDENEGG_API AAvatar : public ACharacter
@@ -55,4 +56,8 @@ public:
 	void Pitch(float amount);
 
 	void ToggleInventory();
+
+	void MouseClicked();
+private:
+	AMyHUD* GetHUD();
 };

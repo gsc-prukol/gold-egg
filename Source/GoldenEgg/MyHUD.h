@@ -68,6 +68,15 @@ struct FMyWidget {
 
 	float top() { return pos.Y; }
 	float bottom() { return pos.Y + size.Y; }
+
+	bool hit(FVector2D p) {
+		//+---+ top(0)
+		//|   |
+		//+---+ bottom(2) (bottom > top)
+		//L   R
+		
+		return p.X > left() && p.X < right() && p.Y > top() && p.Y < bottom();
+	}
 };
 
 
@@ -79,16 +88,21 @@ class GOLDENEGG_API AMyHUD : public AHUD
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUDFont)
 	UFont* hudFont;
+	
+	FMyWidget* heldWidget;
 
 	virtual void DrawHUD() override;
-	void addMessage(FMessage msg);
-	void addWidget(FMyWidget wdg);
-	void clearWidgets();
+	void AddMessage(FMessage msg);
+	void AddWidget(FMyWidget wdg);
+	void ClearWidgets();
+	void MouseClicked();
+	void MouseMoved();
 
 private:
 	TArray<FMessage> messages;
 	TArray<FMyWidget> widgets;
 
+	int canvasSizeX, canvasSizeY;
 	void DrawMessages();
 	void DrawHealthbar();
 	void DrawWidgets();

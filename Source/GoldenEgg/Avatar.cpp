@@ -39,6 +39,7 @@ void AAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("Pitch", this, &AAvatar::Pitch);
 
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AAvatar::ToggleInventory);
+	PlayerInputComponent->BindAction("MouseClickedLMB", IE_Pressed, this, &AAvatar::MouseClicked);
 }
 
 void AAvatar::MoveForward(float amount) {
@@ -60,6 +61,7 @@ void AAvatar::MoveRight(float amount) {
 void AAvatar::Yaw(float amount) {
 	
 	if (inventoryShowing) {
+		GetHUD()->MouseMoved();
 		return;
 	}
 
@@ -69,6 +71,7 @@ void AAvatar::Yaw(float amount) {
 void AAvatar::Pitch(float amount) {
 	
 	if (inventoryShowing) {
+		GetHUD()->MouseMoved();
 		return;
 	}
 	
@@ -81,7 +84,7 @@ void AAvatar::ToggleInventory()
 	AMyHUD* hud = Cast<AMyHUD>(PController->GetHUD());
 
 	if (inventoryShowing) {
-		hud->clearWidgets();
+		hud->ClearWidgets();
 		
 		inventoryShowing = false;
 		PController->bShowMouseCursor = false;
@@ -96,8 +99,21 @@ void AAvatar::ToggleInventory()
 		FString fs = it->Key + FString::Printf(TEXT("x %d"), it->Value);
 		UTexture2D* tex = Icons.Find(it->Key) ? Icons[it->Key] : nullptr;
 
-		hud->addWidget(FMyWidget(FIcon(fs, tex)));
+		hud->AddWidget(FMyWidget(FIcon(fs, tex)));
 	}
+}
+
+void AAvatar::MouseClicked()
+{
+	GetHUD()->MouseClicked();
+}
+
+AMyHUD* AAvatar::GetHUD()
+{
+	APlayerController* PController = GetWorld()->GetFirstPlayerController();
+	AMyHUD* hud = Cast<AMyHUD>(PController->GetHUD());
+
+	return hud;
 }
 
 void AAvatar::Pickup(APickupItem* item)

@@ -5,9 +5,6 @@
 #include "Avatar.h"
 #include <Kismet/GameplayStatics.h>
 #include "MyHUD.h"
-//#include "E:/Epic Games/UE_4.27/Engine/Plugins/Experimental/CommonUI/Source/CommonUI/Public/CommonActionWidget.h"
-//#include "E:/Epic Games/UE_4.27/Engine/Plugins/Editor/ContentBrowser/ContentBrowserAssetDataSource/Source/ContentBrowserAssetDataSource/Private/NewAssetContextMenu.cpp"
-
 
 // Sets default values
 APickupItem::APickupItem(const FObjectInitializer& ObjectInitializer) {
@@ -38,8 +35,7 @@ void APickupItem::Prox_Implementation(class UPrimitiveComponent* OverlappedComp,
 
 	AMyHUD* hud = Cast<AMyHUD>(PController->GetHUD());
 
-	hud->addMessage(FMessage(FString("Picked up") + FString::FromInt(Quantity) + Name, Icon));
+	hud->AddMessage(FMessage(FString("Picked up") + FString::FromInt(Quantity) + Name, Icon));
 
 	Destroy();
-
 }

@@ -10,16 +10,20 @@ void AMyHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
+	canvasSizeX = Canvas->SizeX;
+	canvasSizeY = Canvas->SizeY;
+
 	DrawMessages();
 	DrawHealthbar();
 	DrawWidgets();
 }
 
-void AMyHUD::addMessage(FMessage msg)
+void AMyHUD::AddMessage(FMessage msg)
 {
 	messages.Add(msg);
 }
-void AMyHUD::addWidget(FMyWidget wdg)
+
+void AMyHUD::AddWidget(FMyWidget wdg)
 {
 	FVector2D start(200, 200), pad(12, 12), size(100, 100);
 	wdg.size = size;
@@ -28,7 +32,7 @@ void AMyHUD::addWidget(FMyWidget wdg)
 	for (int i = 0; i < widgets.Num(); i++) {
 		wdg.pos.X += size.X + pad.X;
 
-		if (wdg.pos.X + size.X > Canvas->SizeX) {
+		if (wdg.pos.X + size.X > canvasSizeX) {
 			wdg.pos.X = start.X;
 			wdg.pos.Y += size.Y + pad.Y;
 		}
@@ -36,7 +40,7 @@ void AMyHUD::addWidget(FMyWidget wdg)
 
 	widgets.Add(wdg);
 }
-void AMyHUD::clearWidgets()
+void AMyHUD::ClearWidgets()
 {
 	widgets.Empty();
 }
@@ -52,7 +56,7 @@ void AMyHUD::DrawMessages()
 		float messageH = outputHeight + 2.f * pad;
 		float x = 0.f, y = c * messageH;
 
-		DrawRect(FLinearColor::Black, x, y, Canvas->SizeX, messageH);
+		DrawRect(FLinearColor::Black, x, y, canvasSizeX, messageH);
 		DrawTexture(msg->face, x, y, messageH, messageH, 0, 0, 1, 1);
 		DrawText(msg->message, msg->color, x + pad + messageH, y + pad, hudFont);
 
@@ -77,16 +81,16 @@ void AMyHUD::DrawHealthbar()
 
 	DrawRect(
 		FLinearColor(0, 0, 0, 1),
-		Canvas->SizeX - barWidth - barPad - barMargin,
-		Canvas->SizeY - barHeight - barPad - barMargin,
+		canvasSizeX - barWidth - barPad - barMargin,
+		canvasSizeY - barHeight - barPad - barMargin,
 		barWidth + 2 * barPad,
 		barHeight + 2 * barPad
 	);
 
 	DrawRect(
 		FLinearColor(1 - percHp, percHp, 0, 1),
-		Canvas->SizeX - barWidth - barMargin,
-		Canvas->SizeY - barHeight - barMargin,
+		canvasSizeX - barWidth - barMargin,
+		canvasSizeY - barHeight - barMargin,
 		barWidth*percHp,
 		barHeight
 	);
@@ -94,8 +98,44 @@ void AMyHUD::DrawHealthbar()
 
 void AMyHUD::DrawWidgets()
 {
-	for (auto widget: widgets) {
+	for (auto& widget: widgets) {
 		DrawTexture(widget.icon.tex, widget.pos.X, widget.pos.Y, widget.size.X, widget.size.Y, 0, 0, 1, 1);
 		DrawText(widget.icon.name, FLinearColor::Yellow, widget.pos.X, widget.pos.Y, hudFont, .6f, false);
 	}
+}
+
+void AMyHUD::MouseClicked()
+{
+	FVector2D mouse;
+	PlayerOwner->GetMousePosition(mouse.X, mouse.Y);
+
+	heldWidget = nullptr;
+
+	for (auto& widget : widgets) {
+		if (!widget.hit(mouse)) {
+			
+			continue;
+		}
+
+		heldWidget = &widget;
+		return;
+	}
+}
+
+void AMyHUD::MouseMoved()
+{
+	static FVector2D lastMouse;
+	
+	FVector2D thisMouse;
+	PlayerOwner->GetMousePosition(thisMouse.X, thisMouse.Y);
+	
+	FVector2D dMouse = thisMouse - lastMouse;
+	
+	float time = PlayerOwner->GetInputKeyTimeDown(EKeys::LeftMouseButton);
+	
+	if (time > 0.f && heldWidget) {
+		heldWidget->pos += dMouse;
+	}
+
+	lastMouse = thisMouse;
 }

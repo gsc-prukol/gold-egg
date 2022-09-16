@@ -3,7 +3,9 @@
 
 #include "NPC.h"
 #include "Avatar.h"
+#include "PickupItem.h"
 #include "MyHUD.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 ANPC::ANPC(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -12,11 +14,12 @@ ANPC::ANPC(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitialize
 	//PrimaryActorTick.bCanEverTick = true;
 
 	ProxSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("Proximity Sphere"));
+	
 	ProxSphere->InitSphereRadius(320.f);
 	ProxSphere->AttachTo(RootComponent);
 	
-
 	ProxSphere->OnComponentBeginOverlap.AddDynamic(this, &ANPC::Prox);
+	
 	NpcMessage = "Hi, I'm Owen";
 	Name = "Owen";
 }
@@ -36,23 +39,17 @@ void ANPC::Prox_Implementation(class UPrimitiveComponent* OverlappedComp, class 
 
 	APlayerController* PControler = GetWorld()->GetFirstPlayerController();
 
-	if (PControler) {
-		AMyHUD* hud = Cast<AMyHUD>(PControler->GetHUD());
-		hud->addMessage(FMessage(Name + FString(": ") + NpcMessage, Face));
+	if (!PControler) {
+		return;
+	}
+
+	AMyHUD* hud = Cast<AMyHUD>(PControler->GetHUD());
+	hud->AddMessage(FMessage(Name + FString(": ") + NpcMessage, Face));
+
+	if (Item) {
+		AAvatar* avatar = Cast<AAvatar>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		avatar->Pickup(Item);
+		Item->Destroy();
+		Item = nullptr;
 	}
 }
-
-//// Called every frame
-//void ANPC::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//
-//}
-//
-//// Called to bind functionality to input
-//void ANPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-//{
-//	Super::SetupPlayerInputComponent(PlayerInputComponent);
-//
-//}
-
